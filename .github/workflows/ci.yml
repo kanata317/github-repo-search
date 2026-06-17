@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # --frozen-lockfile: pnpm-lock.yamlを変更せず、lockfileと
+      # package.jsonの不一致がある場合はインストールを失敗させる
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      # --noEmit: 型チェックのみ行い、jsファイルへのコンパイル出力は行わない
+      - run: pnpm exec tsc --noEmit
+
+      - run: pnpm test
