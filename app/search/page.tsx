@@ -1,4 +1,5 @@
 import { SearchForm } from "@/components/SearchForm";
+import { searchRepositories } from "@/lib/github";
 
 type SearchPageProps = {
   searchParams: Promise<{ q?: string; page?: string }>;
@@ -6,15 +7,27 @@ type SearchPageProps = {
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q, page } = await searchParams;
+  const pageNumber = Number(page ?? "1");
+
+  const result = q ? await searchRepositories(q, pageNumber) : null;
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
       <h1 className="text-2xl font-semibold">GitHubリポジトリ検索</h1>
       <SearchForm />
-      {q ? (
-        <p className="text-sm text-muted-foreground">
-          検索クエリ: {q}（page: {page ?? "1"}）
-        </p>
+      {result ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">
+            検索結果: {result.totalCount}件（page: {pageNumber}）
+          </p>
+          <ul className="flex flex-col gap-1">
+            {result.items.map((repo) => (
+              <li key={repo.id} className="text-sm">
+                {repo.fullName}
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
     </main>
   );
