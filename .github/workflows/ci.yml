@@ -22,6 +22,9 @@ jobs:
       # package.jsonの不一致がある場合はインストールを失敗させる
       - run: pnpm install --frozen-lockfile
 
+      # Storybookのplay function（@storybook/addon-vitest）をPlaywright経由で実行するために必要
+      - run: pnpm exec playwright install --with-deps chromium
+
       - run: pnpm lint
 
       # --noEmit: 型チェックのみ行い、jsファイルへのコンパイル出力は行わない
