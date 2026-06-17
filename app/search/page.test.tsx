@@ -2,9 +2,16 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import SearchPage from "./page";
+import type { GithubRepository } from "@/lib/types";
 
 vi.mock("@/components/SearchForm", () => ({
   SearchForm: () => null,
+}));
+
+vi.mock("@/components/RepositoryList", () => ({
+  RepositoryList: ({ repositories }: { repositories: GithubRepository[] }) => (
+    <div data-testid="repository-list">{repositories.length}件</div>
+  ),
 }));
 
 const searchRepositories = vi.fn();
@@ -22,13 +29,10 @@ describe("SearchPage", () => {
     expect(screen.queryByText(/検索結果:/)).not.toBeInTheDocument();
   });
 
-  it("qが指定されている場合、検索結果件数とリポジトリ一覧が表示される", async () => {
+  it("qが指定されている場合、検索結果件数が表示されRepositoryListに渡される", async () => {
     searchRepositories.mockResolvedValueOnce({
       totalCount: 2,
-      items: [
-        { id: 1, fullName: "facebook/react" },
-        { id: 2, fullName: "vuejs/vue" },
-      ],
+      items: [{ id: 1 }, { id: 2 }],
     });
 
     const ui = await SearchPage({
@@ -38,8 +42,7 @@ describe("SearchPage", () => {
 
     expect(searchRepositories).toHaveBeenCalledWith("react", 2);
     expect(screen.getByText("検索結果: 2件（page: 2）")).toBeInTheDocument();
-    expect(screen.getByText("facebook/react")).toBeInTheDocument();
-    expect(screen.getByText("vuejs/vue")).toBeInTheDocument();
+    expect(screen.getByTestId("repository-list")).toHaveTextContent("2件");
   });
 
   it("pageが省略されている場合、デフォルトで1が使われる", async () => {

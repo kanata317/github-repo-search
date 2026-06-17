@@ -1,3 +1,4 @@
+import { RepositoryList } from "@/components/RepositoryList";
 import { SearchForm } from "@/components/SearchForm";
 import { searchRepositories } from "@/lib/github";
 
@@ -16,17 +17,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <h1 className="text-2xl font-semibold">GitHubリポジトリ検索</h1>
       <SearchForm />
       {result ? (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
             検索結果: {result.totalCount}件（page: {pageNumber}）
           </p>
-          <ul className="flex flex-col gap-1">
-            {result.items.map((repo) => (
-              <li key={repo.id} className="text-sm">
-                {repo.fullName}
-              </li>
-            ))}
-          </ul>
+          <RepositoryList repositories={result.items} />
         </div>
       ) : null}
     </main>
