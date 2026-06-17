@@ -18,10 +18,13 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # --frozen-lockfile: pnpm-lock.yamlを変更せず、lockfileと
+      # package.jsonの不一致がある場合はインストールを失敗させる
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm lint
 
+      # --noEmit: 型チェックのみ行い、jsファイルへのコンパイル出力は行わない
       - run: pnpm exec tsc --noEmit
 
       - run: pnpm test
