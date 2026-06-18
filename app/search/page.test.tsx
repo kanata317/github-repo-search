@@ -14,6 +14,20 @@ vi.mock("@/components/RepositoryList", () => ({
   ),
 }));
 
+vi.mock("@/components/Pagination", () => ({
+  Pagination: ({
+    currentPage,
+    totalPages,
+  }: {
+    currentPage: number;
+    totalPages: number;
+  }) => (
+    <div data-testid="pagination">
+      {currentPage}/{totalPages}
+    </div>
+  ),
+}));
+
 const searchRepositories = vi.fn();
 
 vi.mock("@/lib/github", () => ({
@@ -29,9 +43,11 @@ describe("SearchPage", () => {
     expect(screen.queryByText(/検索結果:/)).not.toBeInTheDocument();
   });
 
-  it("qが指定されている場合、検索結果件数が表示されRepositoryListに渡される", async () => {
+  it("qが指定されている場合、検索結果件数が表示されRepositoryList/Paginationに渡される", async () => {
     searchRepositories.mockResolvedValueOnce({
       totalCount: 2,
+      page: 2,
+      totalPages: 5,
       items: [{ id: 1 }, { id: 2 }],
     });
 
@@ -43,10 +59,16 @@ describe("SearchPage", () => {
     expect(searchRepositories).toHaveBeenCalledWith("react", 2);
     expect(screen.getByText("検索結果: 2件（page: 2）")).toBeInTheDocument();
     expect(screen.getByTestId("repository-list")).toHaveTextContent("2件");
+    expect(screen.getByTestId("pagination")).toHaveTextContent("2/5");
   });
 
   it("pageが省略されている場合、デフォルトで1が使われる", async () => {
-    searchRepositories.mockResolvedValueOnce({ totalCount: 0, items: [] });
+    searchRepositories.mockResolvedValueOnce({
+      totalCount: 0,
+      page: 1,
+      totalPages: 0,
+      items: [],
+    });
 
     const ui = await SearchPage({
       searchParams: Promise.resolve({ q: "react" }),

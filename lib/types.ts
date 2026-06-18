@@ -12,5 +12,7 @@ export type GithubRepository = {
 
 export type GithubSearchResult = {
   totalCount: number;
+  page: number;
+  totalPages: number;
   items: GithubRepository[];
 };
