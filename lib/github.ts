@@ -1,5 +1,14 @@
 import type { GithubRepository, GithubSearchResult } from "@/lib/types";
 
+export const REPOSITORIES_PER_PAGE = 10;
+
+// GitHub Search APIは検索結果の先頭1000件までしか取得できない制約がある
+const MAX_SEARCHABLE_RESULTS = 1000;
+
+export function getMaxPage(perPage: number): number {
+  return Math.floor(MAX_SEARCHABLE_RESULTS / perPage);
+}
+
 type GithubSearchRepositoriesApiItem = {
   id: number;
   name: string;
@@ -37,11 +46,16 @@ function toGithubRepository(
 
 export async function searchRepositories(
   query: string,
-  page: number
+  page: number,
+  perPage: number = REPOSITORIES_PER_PAGE
 ): Promise<GithubSearchResult> {
+  const maxPage = getMaxPage(perPage);
+  const clampedPage = Math.min(Math.max(page, 1), maxPage);
+
   const params = new URLSearchParams({
     q: query,
-    page: String(page),
+    page: String(clampedPage),
+    per_page: String(perPage),
   });
 
   const res = await fetch(
@@ -59,9 +73,12 @@ export async function searchRepositories(
   }
 
   const data: GithubSearchRepositoriesApiResponse = await res.json();
+  const totalPages = Math.min(Math.ceil(data.total_count / perPage), maxPage);
 
   return {
     totalCount: data.total_count,
+    page: clampedPage,
+    totalPages,
     items: data.items.map(toGithubRepository),
   };
 }

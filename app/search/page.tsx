@@ -1,3 +1,4 @@
+import { Pagination } from "@/components/Pagination";
 import { RepositoryList } from "@/components/RepositoryList";
 import { SearchForm } from "@/components/SearchForm";
 import { searchRepositories } from "@/lib/github";
@@ -19,9 +20,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       {result ? (
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
-            検索結果: {result.totalCount}件（page: {pageNumber}）
+            検索結果: {result.totalCount}件（page: {result.page}）
           </p>
           <RepositoryList repositories={result.items} />
+          <Pagination currentPage={result.page} totalPages={result.totalPages} />
         </div>
       ) : null}
     </main>
